@@ -17,6 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let assets = current_dir()?.join("assets");
 	config.debug_level = DebugLevel::Warn;
 	config.assets_folder = assets.clone();
+    config.license_token_data = std::env::var("ULTALPR_TOKEN").ok();
 
 	let engine = Engine::init(&config)?;
 
