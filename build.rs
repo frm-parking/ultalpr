@@ -16,7 +16,11 @@ fn main() {
 	);
 
 	println!("cargo:rustc-link-lib=dylib=ultimate_alpr-sdk");
-	println!("cargo:rustc-link-lib=dylib=tensorflow");
+
+    if cfg!(not(target_arch = "aarch64")) {
+        println!("cargo:rustc-link-lib=dylib=tensorflow");
+    }
+
 	println!("cargo:rustc-link-lib=dylib=tensorflow_framework");
 
 	println!("cargo:rerun-if-changed=wrapper.hpp");
