@@ -1,0 +1,11 @@
+[package]
+name = "jpg-recognition"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+engine.workspace = true
+anyhow.workspace = true
+image = "0.24"

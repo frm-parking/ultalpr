@@ -3,15 +3,15 @@ use std::fs;
 use std::fs::File;
 use std::io::Read;
 
-use alpr::engine::Engine;
+use engine::Engine;
 
-use crate::alpr::config::Config;
-use crate::alpr::config::DebugLevel;
-use crate::alpr::engine::ImageType;
+use engine::config::Config;
+use engine::config::DebugLevel;
+use engine::engine::ImageType;
 
-mod alpr;
+use anyhow::Result;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<()> {
 	let mut config = Config::default();
 
 	let assets = current_dir()?.join("assets");
