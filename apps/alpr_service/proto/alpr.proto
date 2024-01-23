@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package alpr;
+
+service Alpr {
+	rpc Hello(HelloRequest) returns (HelloReply) {};
+}
+
+message HelloRequest {
+
+}
+
+message HelloReply {
+
+}
