@@ -1,5 +1,3 @@
-#![feature(negative_impls)]
-
 mod bindings;
 pub mod config;
 pub mod engine;
