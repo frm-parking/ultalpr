@@ -165,6 +165,7 @@ name = "engine"
 version = "0.1.0"
 dependencies = [
  "bindgen",
+ "image",
  "serde",
  "serde_json",
  "thiserror",
