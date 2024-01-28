@@ -10,9 +10,15 @@ tokio.workspace = true
 anyhow.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
-restream_core = { git = "ssh://git@github.com/frm-parking/restream.git", rev = "9a15d00aad84b1d853bab6a0ff5a4cd2ecd292ac" }
+serde.workspace = true
+engine.workspace = true
+restream_core = { git = "ssh://git@github.com/frm-parking/restream.git", rev = "b8693018314f27c5aab1d469c1ef16c781126200" }
+url = { version = "2.5", features = ["serde"] }
+image = "0.24"
 tonic = "0.10"
 prost = "0.12"
+toml = "0.8"
+openh264 = "0.5"
 
 [build-dependencies]
 tonic-build = "0.10"

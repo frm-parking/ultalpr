@@ -123,6 +123,40 @@ impl Engine {
 
 		Ok(serde_json::from_str(raw_json)?)
 	}
+
+	pub fn process_yuv(
+		&self,
+		image_type: ImageType,
+		width: usize,
+		height: usize,
+		y_strides: usize,
+		u_strides: usize,
+		v_strides: usize,
+		y_stride: &[u8],
+		u_stride: &[u8],
+		v_stride: &[u8],
+	) -> Result<ProcessResult, ProcessError> {
+		let result = unsafe {
+			ultimateAlprSdk_UltAlprSdkEngine::process1(
+				image_type.to_internal(),
+				y_stride as *const _ as *const c_void,
+				u_stride as *const _ as *const c_void,
+				v_stride as *const _ as *const c_void,
+				width,
+				height,
+				y_strides,
+				u_strides,
+				v_strides,
+				0,
+				1,
+			)
+		};
+
+		let raw_json = unsafe { CString::from_raw(result.json_) };
+		let raw_json = raw_json.to_str()?;
+
+		Ok(serde_json::from_str(raw_json)?)
+	}
 }
 
 impl Drop for Engine {

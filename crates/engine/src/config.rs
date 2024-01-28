@@ -118,7 +118,7 @@ impl Default for Config {
 			npu_enabled: true,
 			max_latency: -1,
 			ienv_enabled: false,
-			assets_folder: ".".into(),
+			assets_folder: "assets".into(),
 			charset: Charset::Latin,
 			openvino_enabled: true,
 			openvino_device: OpenvinoDevice::Cpu,
