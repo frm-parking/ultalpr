@@ -5,7 +5,7 @@ fn main() {
 	println!("cargo:rerun-if-changed=build.rs");
 
 	println!(
-		"cargo:rustc-link-search=all=natives/{}",
+		"cargo:rustc-link-search=all=assets/{}",
 		if cfg!(target_arch = "x86_64") {
 			"x86_64"
 		} else if cfg!(target_arch = "aarch64") {
@@ -17,9 +17,9 @@ fn main() {
 
 	println!("cargo:rustc-link-lib=dylib=ultimate_alpr-sdk");
 
-    if cfg!(not(target_arch = "aarch64")) {
-        println!("cargo:rustc-link-lib=dylib=tensorflow");
-    }
+	if cfg!(not(target_arch = "aarch64")) {
+		println!("cargo:rustc-link-lib=dylib=tensorflow");
+	}
 
 	println!("cargo:rustc-link-lib=dylib=tensorflow_framework");
 
