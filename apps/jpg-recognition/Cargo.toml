@@ -6,6 +6,6 @@ authors.workspace = true
 license.workspace = true
 
 [dependencies]
-engine.workspace = true
+engine = { workspace = true, features = ["image"] }
 anyhow.workspace = true
 image = "0.24"

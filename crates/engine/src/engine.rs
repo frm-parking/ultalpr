@@ -4,7 +4,6 @@ use std::ptr;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 
-use image::DynamicImage;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -101,11 +100,12 @@ impl Engine {
 		Ok(Self { cconfig })
 	}
 
+	#[cfg(feature = "image")]
 	pub fn process(
 		&self,
 		image_type: ImageType,
 		raw: &[u8],
-		image: &DynamicImage,
+		image: &image::DynamicImage,
 	) -> Result<ProcessResult, ProcessError> {
 		let result = unsafe {
 			ultimateAlprSdk_UltAlprSdkEngine::process(
@@ -124,6 +124,7 @@ impl Engine {
 		Ok(serde_json::from_str(raw_json)?)
 	}
 
+	#[allow(clippy::too_many_arguments)]
 	pub fn process_yuv(
 		&self,
 		image_type: ImageType,

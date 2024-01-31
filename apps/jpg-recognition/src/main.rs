@@ -3,13 +3,11 @@ use std::fs;
 use std::fs::File;
 use std::io::Read;
 
-use engine::Engine;
-
+use anyhow::Result;
 use engine::config::Config;
 use engine::config::DebugLevel;
 use engine::engine::ImageType;
-
-use anyhow::Result;
+use engine::Engine;
 
 fn main() -> Result<()> {
 	let mut config = Config::default();
@@ -17,7 +15,7 @@ fn main() -> Result<()> {
 	let assets = current_dir()?.join("assets");
 	config.debug_level = DebugLevel::Warn;
 	config.assets_folder = assets.clone();
-  config.license_token_data = std::env::var("ULTALPR_TOKEN").ok();
+	config.license_token_data = std::env::var("ULTALPR_TOKEN").ok();
 
 	let engine = Engine::init(&config)?;
 
