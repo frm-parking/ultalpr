@@ -4,10 +4,10 @@ use std::fs::File;
 use std::io::Read;
 
 use anyhow::Result;
-use engine::config::Config;
-use engine::config::DebugLevel;
-use engine::engine::ImageType;
-use engine::Engine;
+use ultalpr::config::Config;
+use ultalpr::config::DebugLevel;
+use ultalpr::engine::ImageType;
+use ultalpr::Engine;
 
 fn main() -> Result<()> {
 	let mut config = Config::default();
