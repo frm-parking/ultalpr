@@ -9,3 +9,4 @@ license.workspace = true
 ultalpr = { workspace = true, features = ["image"] }
 anyhow.workspace = true
 image = "0.24"
+tokio.workspace = true

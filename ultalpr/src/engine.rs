@@ -1,50 +1,38 @@
 use std::ffi::c_void;
 use std::ffi::CString;
 use std::ptr;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering;
 
 use serde::Deserialize;
 use serde::Serialize;
 
-use super::bindings::*;
-use super::config::Config;
-use super::error::ConfigCastError;
-use super::error::ProcessError;
+use crate::bindings::ultimateAlprSdk_UltAlprSdkEngine as sdk;
+use crate::yuv::YuvImage;
+use crate::Config;
+use crate::InitError;
+use crate::ProcessError;
 
-static INIT: AtomicBool = AtomicBool::new(false);
+pub struct Deinit;
 
-#[allow(dead_code)]
-pub enum ImageType {
-	RGB24,
-	RGBA32,
-	BGRA32,
-	NV12,
-	NV21,
-	YUV420P,
-	YVU420P,
-	YUV422P,
-	YUV444P,
-	BGR24,
-	Y,
-}
-
-impl ImageType {
-	pub fn to_internal(&self) -> u32 {
-		match self {
-			Self::RGB24 => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_RGB24,
-			Self::RGBA32 => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_RGBA32,
-			Self::BGRA32 => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_BGRA32,
-			Self::NV12 => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_NV12,
-			Self::NV21 => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_NV21,
-			Self::YUV420P => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_YUV420P,
-			Self::YVU420P => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_YVU420P,
-			Self::YUV422P => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_YUV422P,
-			Self::YUV444P => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_YUV444P,
-			Self::BGR24 => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_BGR24,
-			Self::Y => ultimateAlprSdk_ULTALPR_SDK_IMAGE_TYPE_ULTALPR_SDK_IMAGE_TYPE_Y,
+impl Drop for Deinit {
+	fn drop(&mut self) {
+		unsafe {
+			sdk::deInit();
 		}
 	}
+}
+
+pub async fn init(config: Config) -> Result<Deinit, InitError> {
+	tokio::task::spawn_blocking(move || {
+		let cconfig = config.to_cstring()?;
+		let config_ptr = cconfig.as_ptr();
+
+		unsafe {
+			sdk::init(config_ptr, ptr::null());
+		}
+
+		Ok(Deinit)
+	})
+	.await?
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -75,46 +63,20 @@ pub struct ProcessResult {
 	pub plates: Vec<Plate>,
 }
 
-#[derive(Debug)]
-pub struct Engine {
-	#[allow(unused)]
-	cconfig: CString,
-}
-
-impl Engine {
-	pub fn init(config: &Config) -> Result<Engine, ConfigCastError> {
-		let status = INIT.load(Ordering::Relaxed);
-
-		let cconfig = config.to_cstring()?;
-
-		if status {
-			panic!("Only one instance can be initialized");
-		}
-
-		unsafe {
-			ultimateAlprSdk_UltAlprSdkEngine::init(cconfig.as_ptr(), ptr::null());
-		}
-
-		INIT.store(true, Ordering::Relaxed);
-
-		Ok(Self { cconfig })
-	}
-
-	#[cfg(feature = "image")]
-	pub fn process(
-		&self,
-		image_type: ImageType,
-		raw: &[u8],
-		image: &image::DynamicImage,
-	) -> Result<ProcessResult, ProcessError> {
+#[cfg(feature = "image")]
+pub async fn process_image(
+	raw: Vec<u8>,
+	image: image::DynamicImage,
+) -> Result<ProcessResult, ProcessError> {
+	tokio::task::spawn_blocking(move || {
 		let result = unsafe {
-			ultimateAlprSdk_UltAlprSdkEngine::process(
-				image_type.to_internal(),
+			sdk::process(
+				0,
 				image.as_bytes().as_ptr() as *const c_void,
 				image.width() as usize,
 				image.height() as usize,
 				0,
-				ultimateAlprSdk_UltAlprSdkEngine::exifOrientation(raw.as_ptr() as *const c_void, raw.len()),
+				sdk::exifOrientation(raw.as_ptr() as *const c_void, raw.len()),
 			)
 		};
 
@@ -122,32 +84,23 @@ impl Engine {
 		let raw_json = raw_json.to_str()?;
 
 		Ok(serde_json::from_str(raw_json)?)
-	}
+	})
+	.await?
+}
 
-	#[allow(clippy::too_many_arguments)]
-	pub fn process_yuv(
-		&self,
-		image_type: ImageType,
-		width: usize,
-		height: usize,
-		y_strides: usize,
-		u_strides: usize,
-		v_strides: usize,
-		y_stride: &[u8],
-		u_stride: &[u8],
-		v_stride: &[u8],
-	) -> Result<ProcessResult, ProcessError> {
+pub async fn process_yuv(image: YuvImage) -> Result<ProcessResult, ProcessError> {
+	tokio::task::spawn_blocking(move || {
 		let result = unsafe {
-			ultimateAlprSdk_UltAlprSdkEngine::process1(
-				image_type.to_internal(),
-				y_stride as *const _ as *const c_void,
-				u_stride as *const _ as *const c_void,
-				v_stride as *const _ as *const c_void,
-				width,
-				height,
-				y_strides,
-				u_strides,
-				v_strides,
+			sdk::process1(
+				5,
+				&image.y as *const _ as *const _,
+				&image.u as *const _ as *const _,
+				&image.v as *const _ as *const _,
+				image.width,
+				image.height,
+				image.width,
+				image.width / 2,
+				image.width / 2,
 				0,
 				1,
 			)
@@ -157,15 +110,6 @@ impl Engine {
 		let raw_json = raw_json.to_str()?;
 
 		Ok(serde_json::from_str(raw_json)?)
-	}
-}
-
-impl Drop for Engine {
-	fn drop(&mut self) {
-		INIT.store(false, Ordering::Relaxed);
-
-		unsafe {
-			ultimateAlprSdk_UltAlprSdkEngine::deInit();
-		}
-	}
+	})
+	.await?
 }
