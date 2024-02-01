@@ -97,9 +97,9 @@ pub async fn process_yuv(image: YuvImage) -> Result<ProcessResult, UltalprError>
 				&image.v as *const _ as *const _,
 				image.width,
 				image.height,
-				image.width,
-				image.width / 2,
-				image.width / 2,
+				image.y_strides,
+				image.u_strides,
+				image.v_strides,
 				0,
 				1,
 			)
