@@ -8,8 +8,7 @@ use serde::Serialize;
 use crate::bindings::ultimateAlprSdk_UltAlprSdkEngine as sdk;
 use crate::yuv::YuvImage;
 use crate::Config;
-use crate::InitError;
-use crate::ProcessError;
+use crate::UltalprError;
 
 pub struct Deinit;
 
@@ -21,7 +20,7 @@ impl Drop for Deinit {
 	}
 }
 
-pub async fn init(config: Config) -> Result<Deinit, InitError> {
+pub async fn init(config: Config) -> Result<Deinit, UltalprError> {
 	tokio::task::spawn_blocking(move || {
 		let cconfig = config.to_cstring()?;
 		let config_ptr = cconfig.as_ptr();
@@ -67,7 +66,7 @@ pub struct ProcessResult {
 pub async fn process_image(
 	raw: Vec<u8>,
 	image: image::DynamicImage,
-) -> Result<ProcessResult, ProcessError> {
+) -> Result<ProcessResult, UltalprError> {
 	tokio::task::spawn_blocking(move || {
 		let result = unsafe {
 			sdk::process(
@@ -88,7 +87,7 @@ pub async fn process_image(
 	.await?
 }
 
-pub async fn process_yuv(image: YuvImage) -> Result<ProcessResult, ProcessError> {
+pub async fn process_yuv(image: YuvImage) -> Result<ProcessResult, UltalprError> {
 	tokio::task::spawn_blocking(move || {
 		let result = unsafe {
 			sdk::process1(

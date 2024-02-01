@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use serde::Deserialize;
 use serde::Serialize;
 
-use super::error::InitError;
+use crate::UltalprError;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -154,7 +154,7 @@ impl Config {
 		serde_json::to_string(self)
 	}
 
-	pub fn to_cstring(&self) -> Result<CString, InitError> {
+	pub fn to_cstring(&self) -> Result<CString, UltalprError> {
 		Ok(CString::new(self.to_json()?.as_str())?)
 	}
 }
