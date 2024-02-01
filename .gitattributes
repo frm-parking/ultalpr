@@ -1,3 +1,0 @@
-*.so filter=lfs diff=lfs merge=lfs -text
-*.so.* filter=lfs diff=lfs merge=lfs -text
-*.model.doubango filter=lfs diff=lfs merge=lfs -text

@@ -92,9 +92,9 @@ pub async fn process_yuv(image: YuvImage) -> Result<ProcessResult, UltalprError>
 		let result = unsafe {
 			sdk::process1(
 				5,
-				&image.y as *const _ as *const _,
-				&image.u as *const _ as *const _,
-				&image.v as *const _ as *const _,
+				&image.y as *const _ as *const c_void,
+				&image.u as *const _ as *const c_void,
+				&image.v as *const _ as *const c_void,
 				image.width,
 				image.height,
 				image.y_strides,
