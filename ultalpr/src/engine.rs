@@ -1,4 +1,3 @@
-use std::ffi::c_void;
 use std::ffi::CString;
 use std::ptr;
 
@@ -63,19 +62,16 @@ pub struct ProcessResult {
 }
 
 #[cfg(feature = "image")]
-pub async fn process_image(
-	raw: Vec<u8>,
-	image: image::DynamicImage,
-) -> Result<ProcessResult, UltalprError> {
+pub async fn process_image(image: image::DynamicImage) -> Result<ProcessResult, UltalprError> {
 	tokio::task::spawn_blocking(move || {
 		let result = unsafe {
 			sdk::process(
 				0,
-				image.as_bytes().as_ptr() as *const c_void,
+				image.as_bytes().as_ptr() as *const _,
 				image.width() as usize,
 				image.height() as usize,
 				0,
-				sdk::exifOrientation(raw.as_ptr() as *const c_void, raw.len()),
+				1,
 			)
 		};
 
@@ -92,9 +88,9 @@ pub async fn process_yuv(image: YuvImage) -> Result<ProcessResult, UltalprError>
 		let result = unsafe {
 			sdk::process1(
 				5,
-				&image.y as *const _ as *const c_void,
-				&image.u as *const _ as *const c_void,
-				&image.v as *const _ as *const c_void,
+				&image.y as *const _ as *const _,
+				&image.u as *const _ as *const _,
+				&image.v as *const _ as *const _,
 				image.width,
 				image.height,
 				image.y_strides,
