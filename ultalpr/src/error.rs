@@ -23,3 +23,12 @@ pub enum ProcessError {
 	#[error(transparent)]
 	Join(#[from] tokio::task::JoinError),
 }
+
+#[derive(Debug, Error)]
+pub enum UltalprError {
+	#[error(transparent)]
+	InitError(#[from] InitError),
+
+	#[error(transparent)]
+	ProcessError(#[from] ProcessError),
+}
