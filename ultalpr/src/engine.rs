@@ -19,18 +19,15 @@ impl Drop for Deinit {
 	}
 }
 
-pub async fn init(config: Config) -> Result<Deinit, UltalprError> {
-	tokio::task::spawn_blocking(move || {
-		let cconfig = config.to_cstring()?;
-		let config_ptr = cconfig.as_ptr();
+pub fn init(config: Config) -> Result<Deinit, UltalprError> {
+	let cconfig = config.to_cstring()?;
+	let config_ptr = cconfig.as_ptr();
 
-		unsafe {
-			sdk::init(config_ptr, ptr::null());
-		}
+	unsafe {
+		sdk::init(config_ptr, ptr::null());
+	}
 
-		Ok(Deinit)
-	})
-	.await?
+	Ok(Deinit)
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -62,49 +59,43 @@ pub struct ProcessResult {
 }
 
 #[cfg(feature = "image")]
-pub async fn process_image(image: image::DynamicImage) -> Result<ProcessResult, UltalprError> {
-	tokio::task::spawn_blocking(move || {
-		let result = unsafe {
-			sdk::process(
-				0,
-				image.as_bytes().as_ptr() as *const _,
-				image.width() as usize,
-				image.height() as usize,
-				0,
-				1,
-			)
-		};
+pub fn process_image(image: image::DynamicImage) -> Result<ProcessResult, UltalprError> {
+	let result = unsafe {
+		sdk::process(
+			0,
+			image.as_bytes().as_ptr() as *const _,
+			image.width() as usize,
+			image.height() as usize,
+			0,
+			1,
+		)
+	};
 
-		let raw_json = unsafe { CString::from_raw(result.json_) };
-		let raw_json = raw_json.to_str()?;
+	let raw_json = unsafe { CString::from_raw(result.json_) };
+	let raw_json = raw_json.to_str()?;
 
-		Ok(serde_json::from_str(raw_json)?)
-	})
-	.await?
+	Ok(serde_json::from_str(raw_json)?)
 }
 
-pub async fn process_yuv(image: YuvImage) -> Result<ProcessResult, UltalprError> {
-	tokio::task::spawn_blocking(move || {
-		let result = unsafe {
-			sdk::process1(
-				5,
-				&image.y as *const _ as *const _,
-				&image.u as *const _ as *const _,
-				&image.v as *const _ as *const _,
-				image.width,
-				image.height,
-				image.y_strides,
-				image.u_strides,
-				image.v_strides,
-				0,
-				1,
-			)
-		};
+pub fn process_yuv(image: YuvImage) -> Result<ProcessResult, UltalprError> {
+	let result = unsafe {
+		sdk::process1(
+			5,
+			&image.y as *const _ as *const _,
+			&image.u as *const _ as *const _,
+			&image.v as *const _ as *const _,
+			image.width,
+			image.height,
+			image.y_strides,
+			image.u_strides,
+			image.v_strides,
+			0,
+			1,
+		)
+	};
 
-		let raw_json = unsafe { CString::from_raw(result.json_) };
-		let raw_json = raw_json.to_str()?;
+	let raw_json = unsafe { CString::from_raw(result.json_) };
+	let raw_json = raw_json.to_str()?;
 
-		Ok(serde_json::from_str(raw_json)?)
-	})
-	.await?
+	Ok(serde_json::from_str(raw_json)?)
 }

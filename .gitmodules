@@ -1,3 +1,0 @@
-[submodule "assets"]
-	path = assets
-	url = ssh://git@git.parking.msk.ru:7022/frm/assets.git
