@@ -1,8 +1,6 @@
-use std::ffi::CString;
-use std::path::PathBuf;
+use std::{ffi::CString, path::PathBuf};
 
-use serde::Deserialize;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::UltalprError;
 
@@ -150,6 +148,10 @@ impl Default for Config {
 }
 
 impl Config {
+	pub fn default_with_token(token: impl Into<Option<String>>) -> Self {
+		Self { license_token_data: token.into(), ..Default::default() }
+	}
+
 	pub fn to_json(&self) -> Result<String, serde_json::Error> {
 		serde_json::to_string(self)
 	}

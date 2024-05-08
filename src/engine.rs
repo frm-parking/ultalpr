@@ -1,13 +1,8 @@
-use std::ffi::CString;
-use std::ptr;
+use std::{ffi::CString, ptr};
 
-use serde::Deserialize;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-use crate::bindings::ultimateAlprSdk_UltAlprSdkEngine as sdk;
-use crate::yuv::YuvImage;
-use crate::Config;
-use crate::UltalprError;
+use crate::{bindings::ultimateAlprSdk_UltAlprSdkEngine as sdk, yuv::YuvImage, Config, UltalprError};
 
 pub struct Deinit;
 
@@ -41,12 +36,7 @@ impl Plate {
 	pub fn bounding_box(&self) -> (u32, u32, u32, u32) {
 		let [x1, y1, _, _, x2, y2, _, _] = self.warped_box;
 
-		(
-			x1 as u32,
-			y1 as u32,
-			x2 as u32 - x1 as u32,
-			y2 as u32 - y1 as u32,
-		)
+		(x1 as u32, y1 as u32, x2 as u32 - x1 as u32, y2 as u32 - y1 as u32)
 	}
 }
 
@@ -54,21 +44,14 @@ impl Plate {
 pub struct ProcessResult {
 	pub duration: u32,
 	pub frame_id: u32,
-	#[serde(default = "Vec::new")]
+	#[serde(default)]
 	pub plates: Vec<Plate>,
 }
 
 #[cfg(feature = "image")]
 pub fn process_image(image: image::DynamicImage) -> Result<ProcessResult, UltalprError> {
 	let result = unsafe {
-		sdk::process(
-			0,
-			image.as_bytes().as_ptr() as *const _,
-			image.width() as usize,
-			image.height() as usize,
-			0,
-			1,
-		)
+		sdk::process(0, image.as_bytes().as_ptr() as *const _, image.width() as usize, image.height() as usize, 0, 1)
 	};
 
 	let raw_json = unsafe { CString::from_raw(result.json_) };
