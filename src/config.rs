@@ -148,8 +148,8 @@ impl Default for Config {
 }
 
 impl Config {
-	pub fn default_with_token(token: String) -> Self {
-		Self { license_token_data: Some(token), ..Default::default() }
+	pub fn default_with_token(token: impl Into<Option<String>>) -> Self {
+		Self { license_token_data: token.into(), ..Default::default() }
 	}
 
 	pub fn to_json(&self) -> Result<String, serde_json::Error> {
