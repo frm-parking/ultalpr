@@ -1,20 +1,19 @@
-[workspace]
-resolver = "2"
-members = [
-  "ultalpr", "apps/jpg-recognition"
-]
-
-[workspace.package]
+[package]
+name = "ultalpr"
+version = "0.2.0"
 edition = "2021"
-authors = ["LIMPIX31"]
-license = "GPL-3"
 
-[workspace.dependencies]
-ultalpr = { path = "ultalpr" }
-anyhow = "1.0"
-thiserror = "1.0"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-tokio = { version = "1.35", features = ["full"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+[dependencies]
+tracing       = { version = "0.1" }
+thiserror     = { version = "1" }
+serde         = { version = "1", features = ["derive"] }
+serde_json    = { version = "1" }
+image         = { version = "0.25", optional = true }
+openh264      = { version = "0.6", optional = true }
+async-channel = { version = "2", optional = true }
+
+[build-dependencies]
+bindgen = "0.69"
+
+[features]
+async-service = ["async-channel", "image"]
