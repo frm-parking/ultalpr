@@ -106,7 +106,7 @@ pub struct Config {
 impl Default for Config {
 	fn default() -> Self {
 		Self {
-			debug_level: DebugLevel::Info,
+			debug_level: DebugLevel::Error,
 			debug_write_input_image_enabled: false,
 			debug_internal_data_path: "".into(),
 			license_token_file: None,
